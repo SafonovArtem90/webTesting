@@ -1,1 +1,1 @@
-{"id":"6b15f2771c4f81677867b978aa11a715","fullName":"mywebtests.tests.LoginTest.standardUserCanLogOutAndReturnToLoginPage","name":"Выход стандартного пользователя и возврат на страницу логина","status":"passed","testResultsByEnv":{"default":"b78dab05b2f73108cfdfe3f8d3734ff8"}}
+{"id":"6b15f2771c4f81677867b978aa11a715","fullName":"mywebtests.tests.LoginTest.standardUserCanLogOutAndReturnToLoginPage","name":"Выход стандартного пользователя и возврат на страницу логина","status":"passed","testResultsByEnv":{"default":"a90f7fd9767d507bafc058ace0e35cb7"}}
