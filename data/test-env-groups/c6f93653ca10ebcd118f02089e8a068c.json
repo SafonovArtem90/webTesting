@@ -1,1 +1,1 @@
-{"id":"c6f93653ca10ebcd118f02089e8a068c","fullName":"mywebtests.tests.UserBehaviorTest.visualUserSuccessfullyLogsIn","name":"visualUserSuccessfullyLogsIn()","status":"passed","testResultsByEnv":{"default":"ad6bb855e25a0530ff687a95157c71da"}}
+{"id":"c6f93653ca10ebcd118f02089e8a068c","fullName":"mywebtests.tests.UserBehaviorTest.visualUserSuccessfullyLogsIn","name":"Visual-user: успешный логин и отображение каталога","status":"passed","testResultsByEnv":{"default":"a3215f8cbabe64ca7a669a3889308e49"}}

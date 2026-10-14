@@ -1,1 +1,1 @@
-{"id":"e83caef2a68a5a715008b15f0b09ad86","fullName":"mywebtests.tests.UserBehaviorTest.performanceGlitchUserLogsInWithExtendedTimeout","name":"performanceGlitchUserLogsInWithExtendedTimeout()","status":"passed","testResultsByEnv":{"default":"537d8be0fc2c0639177e01ea394ac1fe"}}
+{"id":"e83caef2a68a5a715008b15f0b09ad86","fullName":"mywebtests.tests.UserBehaviorTest.performanceGlitchUserLogsInWithExtendedTimeout","name":"Performance-glitch-user: медленный логин с расширенным таймаутом","status":"passed","testResultsByEnv":{"default":"36874e63b5398affbbce53d0f4828329"}}

@@ -1,1 +1,1 @@
-{"id":"226295d0c5f0132c5a13ac59fd44e753","fullName":"mywebtests.tests.UserBehaviorTest.problemUserLogsInAndSeesProductNames","name":"problemUserLogsInAndSeesProductNames()","status":"passed","testResultsByEnv":{"default":"58d410b6ddaf514846cb6e92a79ede3a"}}
+{"id":"226295d0c5f0132c5a13ac59fd44e753","fullName":"mywebtests.tests.UserBehaviorTest.problemUserLogsInAndSeesProductNames","name":"Problem-user: логин и отображение названий товаров","status":"passed","testResultsByEnv":{"default":"445aec73de28ed2a28a9c551b60cb869"}}

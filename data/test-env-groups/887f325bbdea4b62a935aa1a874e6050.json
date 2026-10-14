@@ -1,1 +1,1 @@
-{"id":"887f325bbdea4b62a935aa1a874e6050","fullName":"mywebtests.tests.DynamicCatalogTest.lazyLoadCatalogLoadsNextBatchOnSentinelScroll","name":"lazyLoadCatalogLoadsNextBatchOnSentinelScroll()","status":"passed","testResultsByEnv":{"default":"960d07df628c5240d952960b13bbf6f0"}}
+{"id":"887f325bbdea4b62a935aa1a874e6050","fullName":"mywebtests.tests.DynamicCatalogTest.lazyLoadCatalogLoadsNextBatchOnSentinelScroll","name":"Lazy Load: прокрутка к sentinel подгружает следующую партию товаров","status":"passed","testResultsByEnv":{"default":"0be98a2f1c35d8003e2a29263e66fb39"}}

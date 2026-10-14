@@ -1,1 +1,1 @@
-{"id":"677cc92f184b04e1c17550c02b31d75f","fullName":"mywebtests.tests.LoginTest.lockedOutUserCannotAccessInventory","name":"lockedOutUserCannotAccessInventory()","status":"passed","testResultsByEnv":{"default":"ff33588147846476fdcf95d2e8f504e0"}}
+{"id":"677cc92f184b04e1c17550c02b31d75f","fullName":"mywebtests.tests.LoginTest.lockedOutUserCannotAccessInventory","name":"Заблокированный пользователь не имеет доступа к каталогу","status":"passed","testResultsByEnv":{"default":"c271f793452b41d22fb3bd01797cc6cd"}}

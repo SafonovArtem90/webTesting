@@ -1,1 +1,1 @@
-{"id":"d20c83a826b5251c18a22001377d84c3","fullName":"mywebtests.tests.UserBehaviorTest.errorUserSuccessfullyLogsIn","name":"errorUserSuccessfullyLogsIn()","status":"passed","testResultsByEnv":{"default":"ddfc1a31ddf77f2e6e42a87bf87b58c6"}}
+{"id":"d20c83a826b5251c18a22001377d84c3","fullName":"mywebtests.tests.UserBehaviorTest.errorUserSuccessfullyLogsIn","name":"Error-user: успешный логин и отображение каталога","status":"passed","testResultsByEnv":{"default":"cd2004da47f2e36db39db5af45d987a8"}}
