@@ -1,1 +1,1 @@
-{"id":"08271f825e6f31f0025f31dff366581d","fullName":"mywebtests.tests.UserBehaviorTest.visualUserSeesDistortedPrices","name":"Visual-user: цены товаров искажены относительно эталонных","status":"passed","testResultsByEnv":{"default":"64f0e45453c64e54f060dcc645a964ba"}}
+{"id":"08271f825e6f31f0025f31dff366581d","fullName":"mywebtests.tests.UserBehaviorTest.visualUserSeesDistortedPrices","name":"Visual-user: цены товаров искажены относительно эталонных","status":"passed","testResultsByEnv":{"default":"dfc25db2c49d1bbc1618d722fcafb22d"}}

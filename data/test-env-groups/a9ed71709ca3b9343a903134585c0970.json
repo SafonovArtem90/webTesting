@@ -1,1 +1,1 @@
-{"id":"a9ed71709ca3b9343a903134585c0970","fullName":"mywebtests.tests.DynamicCatalogTest.spinnerLoaderIsShownUntilCatalogLoads","name":"Spinner-каталог: лоадер виден во время загрузки, затем сетка товаров","status":"passed","testResultsByEnv":{"default":"32e07a3151967f16e7abf6d3a5946a9e"}}
+{"id":"a9ed71709ca3b9343a903134585c0970","fullName":"mywebtests.tests.DynamicCatalogTest.spinnerLoaderIsShownUntilCatalogLoads","name":"Spinner-каталог: лоадер виден во время загрузки, затем сетка товаров","status":"passed","testResultsByEnv":{"default":"9561b70dad4d4a7a899cdcac76c575e8"}}
