@@ -1,1 +1,1 @@
-{"id":"6cbb0ddbd60b1c4b4020579419fd4066","fullName":"mywebtests.tests.LoginTest.standardUserSuccessfullyLogsInAndSeesInventory","name":"Успешный логин стандартного пользователя и отображение каталога","status":"passed","testResultsByEnv":{"default":"6a9c47b97c1d4d0b603498164a03c3d3"}}
+{"id":"6cbb0ddbd60b1c4b4020579419fd4066","fullName":"mywebtests.tests.LoginTest.standardUserSuccessfullyLogsInAndSeesInventory","name":"Успешный логин стандартного пользователя и отображение каталога","status":"passed","testResultsByEnv":{"default":"d028e081309dfa8b93b75e52c3967847"}}

@@ -1,1 +1,1 @@
-{"id":"052811839f1252af3cdba57b127f7873","fullName":"mywebtests.tests.UserBehaviorTest.errorUserCheckoutFailsWithApiError","name":"Error-user: оформление заказа падает с ошибкой API 401","status":"passed","testResultsByEnv":{"default":"1a9b984bcf77202e539b66397fc7a907"}}
+{"id":"052811839f1252af3cdba57b127f7873","fullName":"mywebtests.tests.UserBehaviorTest.errorUserCheckoutFailsWithApiError","name":"Error-user: оформление заказа падает с ошибкой API 401","status":"passed","testResultsByEnv":{"default":"c829566dc4889a54565579e270eb766b"}}
