@@ -19,14 +19,14 @@ jobs:
   ui-tests:
     # Фиксируем версию: ubuntu-latest переедет на Ubuntu 26 (19.10.2026) — обновляем осознанно
     runs-on: ubuntu-24.04
+    # Защита от зависшего прогона (сеть, браузеры): по истечении — job убивается
+    timeout-minutes: 30
     env:
       # Настройки окружения: переопределяют значения application.properties
       PLAYWRIGHT_BASE_URL: https://www.saucedemo.com
-      PLAYWRIGHT_BROWSER: CHROMIUM
       PLAYWRIGHT_HEADLESS: true
       PLAYWRIGHT_TIMEOUT: 10s
       TESTRUN_RETRY_COUNT: 1
-      SCREENSHOT_DIR: build/screenshots
       # Демо-тест (DemoFailureTest) падает намеренно и запускается в каждом прогоне:
       # проверяет отображение ошибки и скриншота в Allure. Сам прогон он не заваливает.
       DEMO_FAIL: "true"
@@ -57,6 +57,15 @@ jobs:
           distribution: temurin
           java-version: 17
           cache: gradle
+
+      # Браузеры скачиваются только при смене версии Playwright (хеш build.gradle.kts).
+      # restore-keys подхватывает ближайший старый кеш — install тогда лишь дособирает недостающее
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('build.gradle.kts') }}
+          restore-keys: playwright-${{ runner.os }}-
 
       - name: Install Playwright browsers
         run: ./gradlew playwrightInstall --no-daemon

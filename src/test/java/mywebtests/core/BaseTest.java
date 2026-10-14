@@ -2,11 +2,11 @@ package mywebtests.core;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import mywebtests.config.PlaywrightProperties;
+import mywebtests.config.SupportedBrowser;
+import mywebtests.core.extensions.BrowserLabelExtension;
 import mywebtests.core.extensions.RetryOnFailureExtension;
 import mywebtests.core.extensions.ScreenshotOnFailureExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -21,13 +21,14 @@ import mywebtests.data.UserDataProvider;
 
 /**
  * Базовый класс всех UI-тестов.
- * Поднимает Spring-контекст, создаёт изолированную сессию Playwright на каждый тест
- * и подключает расширения: скриншот при падении и повтор при неудаче.
+ * Поднимает Spring-контекст, создаёт изолированный контекст Playwright на каждый тест
+ * и подключает расширения: скриншот при падении, метка браузера и повтор при неудаче.
  */
 @SpringBootTest(classes = SaucedemoTestApplication.class)
 @ExtendWith({ScreenshotOnFailureExtension.class,
+             BrowserLabelExtension.class,
              RetryOnFailureExtension.class})
-public abstract class BaseTest implements PlaywrightSessionReset {
+public abstract class BaseTest implements PlaywrightSessionReset, PageSource, BrowserSource {
 
     private static final Logger log = LoggerFactory.getLogger(BaseTest.class);
 
@@ -37,8 +38,15 @@ public abstract class BaseTest implements PlaywrightSessionReset {
     @Autowired
     protected UserDataProvider userDataProvider;
 
-    protected Playwright playwright;
-    protected Browser browser;
+    @Autowired
+    protected BrowserSelector browserSelector;
+
+    @Autowired
+    protected PlaywrightDriverPool driverPool;
+
+    private SupportedBrowser testBrowser;
+
+    private Browser browser;
     protected BrowserContext context;
     protected Page page;
     protected PageFactory pages;
@@ -60,38 +68,64 @@ public abstract class BaseTest implements PlaywrightSessionReset {
     }
 
     /**
-     * Пересоздаёт сессию Playwright (используется между повторными запусками теста).
+     * Страница текущего теста — читается расширениями JUnit через интерфейс {@link PageSource}.
+     *
+     * @return страница Playwright текущего теста
+     */
+    @Override
+    public Page getPage() {
+        return page;
+    }
+
+    /**
+     * Браузер текущего теста — читается расширением {@link BrowserLabelExtension}
+     * для метки Allure; закреплён за тестом на все попытки.
+     *
+     * @return выбранный для теста браузер
+     */
+    @Override
+    public SupportedBrowser currentBrowser() {
+        return testBrowser;
+    }
+
+    /**
+     * Пересоздаёт контекст Playwright (используется между повторными попытками теста).
+     * Браузер теста не меняется: переиспользуется из пула.
      */
     @Override
     public void resetSession() {
-        log.debug("Пересоздание сессии Playwright для повторной попытки теста");
+        log.debug("Пересоздание контекста Playwright для повторной попытки теста");
         closeSession();
         createSession();
     }
 
     /**
-     * Создаёт Playwright, браузер, контекст и страницу с настроенными таймаутами.
+     * Создаёт браузер, контекст и страницу с настроенными таймаутами.
+     * Playwright-драйвер переиспользуется из пула (один на поток), браузер — свежий
+     * на тест (живые соединения переиспользуемого браузера ненадёжны). Браузер
+     * закрепляется за тестом на все попытки, включая повторные.
      */
     private void createSession() {
-        playwright = Playwright.create();
-        browser = properties.getBrowser()
-                .launch(playwright, new BrowserType.LaunchOptions().setHeadless(properties.isHeadless()));
+        if (testBrowser == null) {
+            testBrowser = browserSelector.next();
+        }
+        browser = driverPool.newBrowser(testBrowser, properties.isHeadless());
         context = browser.newContext();
         page = context.newPage();
         page.setDefaultTimeout(properties.getTimeout().toMillis());
         page.setDefaultNavigationTimeout(properties.getTimeout().toMillis());
         PlaywrightAssertions.setDefaultAssertionTimeout(properties.getTimeout().toMillis());
         pages = new PageFactory(page, properties);
-        WebDriverHolder.setPage(page);
         log.info("Сессия Playwright создана: браузер={}, headless={}, таймаут={}",
-                properties.getBrowser(), properties.isHeadless(), properties.getTimeout());
+                testBrowser, properties.isHeadless(), properties.getTimeout());
     }
 
     /**
-     * Закрывает сессию Playwright, игнорируя ошибки при закрытии частично созданных объектов.
+     * Закрывает контекст и браузер текущего теста, игнорируя ошибки закрытия
+     * частично созданных объектов. Playwright-драйвер переиспользуется — его
+     * закрывает {@link PlaywrightDriverPool} по завершении прогона.
      */
     private void closeSession() {
-        WebDriverHolder.clear();
         try {
             if (context != null) {
                 context.close();
@@ -106,12 +140,8 @@ public abstract class BaseTest implements PlaywrightSessionReset {
         } catch (RuntimeException ignored) {
             // Браузер мог не запуститься
         }
-        if (playwright != null) {
-            playwright.close();
-        }
         context = null;
         browser = null;
-        playwright = null;
         page = null;
         pages = null;
         log.debug("Сессия Playwright закрыта");

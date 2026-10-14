@@ -6,7 +6,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import io.qameta.allure.Step;
 import mywebtests.core.PageFactory;
-import mywebtests.model.UserData;
+import mywebtests.data.UserDataProvider.UserData;
 
 /**
  * Page Object страницы логина Swag Labs.

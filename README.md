@@ -24,7 +24,7 @@
 | Checkstyle | 12.0.0 |
 | Allure (плагин Gradle / Java) | 4.3.0 / 2.35.5 (отчёт — Allure 3) |
 | Logback / SLF4J | от Spring Boot |
-| Браузер | Chromium |
+| Браузер | Chromium / Firefox / WebKit (выбирается автоматически) |
 
 ## Быстрый старт
 
@@ -70,7 +70,7 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 |---|---|
 | `problem_user` | Все изображения товаров — общая заглушка `404` |
 | `performance_glitch_user` | Каталог грузится медленно, но полностью (таймаут 30 с) |
-| `error_user` | Finish → API отвечает 401, заказ не завершается, пользователь остаётся на обзоре |
+| `error_user` | Finish не завершает оформление: перехода на страницу завершения нет, пользователь остаётся на обзоре (проверка браузеро-агностичная) |
 | `visual_user` | Цены случайно искажены при каждой загрузке |
 | `locked_out_user` | Ошибка логина, переход в каталог заблокирован |
 
@@ -89,13 +89,14 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 
 | Слой | Ключевые классы |
 |---|---|
-| База тестов | `BaseTest` — сессия Playwright на каждый тест (`@BeforeEach` / `@AfterEach`), регистрация расширений |
+| База тестов | `BaseTest` — изолированный BrowserContext на каждый тест (`@BeforeEach` / `@AfterEach`), регистрация расширений |
 | Фабрика | `PageFactory` — создаёт page object через Spring-бин, ошибки оборачивает в `PageObjectCreationException` |
-| Хранение | `WebDriverHolder` — `ThreadLocal`, потокобезопасность при параллельном запуске |
-| Расширения | `ScreenshotOnFailureExtension` (`AfterTestExecutionCallback`) — скриншот до закрытия браузера: файл + вложение в Allure; `RetryOnFailureExtension` — повтор с пересозданием сессии |
+| Пул браузеров | `PlaywrightDriverPool` — по одному Playwright-драйверу на поток (node-процесс переиспользуется), браузер — свежий на каждый тест, закрытие — shutdown hook'ом |
+| Выбор браузера | `BrowserSelector` + `SupportedBrowser` — на прогон выбирается пара случайных установленных браузеров, тест уходит в один из двух и браузер закреплён за тестом на все попытки; одиночный запуск — Chromium по умолчанию |
+| Расширения | `ScreenshotOnFailureExtension` — скриншот до закрытия браузера: файл + вложение в Allure; `BrowserLabelExtension` — метка `browser`; `RetryOnFailureExtension` — повтор с пересозданием контекста и шагом «Повторная попытка…» в Allure |
 | Spring-контекст | `SaucedemoTestApplication` (`@SpringBootConfiguration`) + `@EnableConfigurationProperties(PlaywrightProperties.class)` |
 | Page Object | `BasePage`, `LoginPage`, `InventoryPage`, `CartPage`, `CheckoutInformationPage`, `CheckoutOverviewPage`, `DynamicCatalogPage` |
-| Данные | `UserDataProvider` → `users.json` через Jackson; `User` / `UserData` / `CheckoutInfo` на Lombok |
+| Данные | `UserDataProvider` → `users.json` через Jackson (вложенная запись `UserData`); `User` / `CheckoutInfo` на Lombok |
 
 Паттерны: Page Object + собственная фабрика, слоистая архитектура, Builder (модели), DI через Spring, разделение тестов по назначению.
 
@@ -106,11 +107,10 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 | Свойство | Значение по умолчанию | Переменная окружения |
 |---|---|---|
 | `playwright.base-url` | `https://www.saucedemo.com` | `PLAYWRIGHT_BASE_URL` |
-| `playwright.browser` | `CHROMIUM` | `PLAYWRIGHT_BROWSER` (`CHROMIUM` / `FIREFOX` / `WEBKIT`) |
+| `playwright.browser` | не задан (автовыбор пары браузеров) | `PLAYWRIGHT_BROWSER` (`CHROMIUM` / `FIREFOX` / `WEB_KIT`) — явный оверрайд |
 | `playwright.headless` | `true` | `PLAYWRIGHT_HEADLESS` |
 | `playwright.timeout` | `10s` | `PLAYWRIGHT_TIMEOUT` |
 | `testrun.retry-count` | `1` (итого 2 попытки) | `TESTRUN_RETRY_COUNT` |
-| `reporting.screenshot-dir` | `build/screenshots` | `SCREENSHOT_DIR` |
 
 Переменные окружения переопределяют значения файла (relaxed binding Spring Boot). Мосты для системных свойств JUnit — в `build.gradle.kts`.
 
@@ -121,7 +121,8 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 ## Логи, скриншоты и отчёты
 
 - **Логи**: при локальном запуске в консоль Gradle выводятся логи фреймворка (сессия Playwright, создание page object, повторы, скриншоты). Конфиг — `src/test/resources/logback-test.xml` (пакет `mywebtests` — DEBUG, Spring/Playwright — WARN).
-- При падении теста в `build/screenshots/<имя-теста>_<время>.png` сохраняется скриншот страницы (каталог переопределяется `SCREENSHOT_DIR`) **и** он прикрепляется к тесту в Allure («Скриншот при падении»).
+- При падении теста в `build/screenshots/<имя-теста>_<время>.png` сохраняется скриншот страницы **и** он прикрепляется к тесту в Allure («Скриншот при падении»).
+- Браузер теста: на каждый прогон `BrowserSelector` выбирает 2 случайных установленных браузера, каждый тест уходит в один из двух (набор разбивается между браузерами); одиночный запуск теста идёт на Chromium. В Allure попадает метка `browser` — видно, на каком браузере упал тест. Оверрайд браузера — переменная `PLAYWRIGHT_BROWSER`.
 - Отчёт Allure: `./gradlew allureReport` → `build/reports/allure-report/allureReport/index.html`. Шаги тестов — из `@Step`, описания — из Javadoc.
 - Названия тестов и классов в отчёте — русские (`@DisplayName`), приоритет — `@Severity` (blocker / critical / normal / minor / trivial); `historyId` считается от идентификатора теста в JUnit, поэтому смена названий не сбрасывает тренды.
 - Служебные метки JUnit-платформы (`junit.platform.uniqueid`, `framework`, `language`) в отчёт не попадают: фильтр `ServiceLabelsFilter` (`src/test/java/mywebtests/core/allure/`) пишет их в консоль при запуске. Метки `host` и `thread` остаются — из них Allure 3 строит вкладку Timeline. Отладочный режим с метками в отчёте: переменная `ALLURE_KEEP_SERVICE_LABELS=true` (или системное свойство `-Dallure.keepServiceLabels=true`).
@@ -142,8 +143,8 @@ Checkstyle 12.0.0, конфиг — `config/checkstyle/checkstyle.xml`: Javadoc 
 `.github/workflows/ui-tests.yml` — на push в `main`, pull request и вручную:
 
 1. Восстановление истории Allure из ветки `gh-pages`
-2. JDK 17 (temurin) с кешем Gradle
-3. `./gradlew playwrightInstall` — браузеры той же версии, что и в тестах
+2. JDK 17 (temurin) с кешем Gradle; лимит прогона — 30 минут
+3. Кеш браузеров Playwright (`~/.cache/ms-playwright`, ключ по хешу `build.gradle.kts`) и `./gradlew playwrightInstall` — браузеры скачиваются целиком только при смене версии Playwright
 4. `./gradlew checkstyleTest` и `./gradlew test` — каждый шаг продолжает прогон при падении, чтобы собрать отчёт; тесты идут с `DEMO_FAIL=true` (демо-тест падает каждый раз)
 5. `./gradlew allureReport` — отчёт с историей трендов, публикация в `gh-pages`
 6. Артефакты: `allure-results` (всегда) и `screenshots` (при падении)
@@ -158,4 +159,4 @@ Checkstyle 12.0.0, конфиг — `config/checkstyle/checkstyle.xml`: Javadoc 
 | `Executable did not launch browser` / нет браузера | `./gradlew playwrightInstall` |
 | Ошибка «unsupported class file major version» | Нужна Java 17 (`java -version`) |
 | Падает Checkstyle на новом файле | Обязательный Javadoc над классом и методами, строка ≤ 120 символов |
-| Нет скриншота при падении | Проверьте `SCREENSHOT_DIR`; скриншот снимается до закрытия браузера в `@AfterEach` |
+| Нет скриншота при падении | Скриншот снимается до закрытия браузера в `@AfterEach`, файлы — в `build/screenshots` |

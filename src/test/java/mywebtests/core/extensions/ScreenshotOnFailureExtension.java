@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import mywebtests.core.WebDriverHolder;
+import mywebtests.core.PageSource;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
@@ -19,14 +19,14 @@ import org.slf4j.LoggerFactory;
  * Расширение JUnit 5: при падении теста сохраняет скриншот страницы в файл
  * и прикрепляет его к отчёту Allure.
  * Реализовано через AfterTestExecutionCallback, чтобы снимок делался до закрытия
- * браузера в @AfterEach. Файлы пишутся в директорию из системного свойства
- * reporting.screenshot-dir (мостится из переменной окружения SCREENSHOT_DIR в build.gradle).
+ * браузера в @AfterEach. Страницу читает из инстанса теста через интерфейс
+ * {@link PageSource}; файлы пишутся в каталог build/screenshots.
  */
 public class ScreenshotOnFailureExtension implements AfterTestExecutionCallback {
 
     private static final Logger log = LoggerFactory.getLogger(ScreenshotOnFailureExtension.class);
 
-    private static final String DEFAULT_SCREENSHOT_DIR = "build/screenshots";
+    private static final Path SCREENSHOT_DIR = Paths.get("build/screenshots");
     private static final String ALLURE_ATTACHMENT_NAME = "Скриншот при падении";
     private static final DateTimeFormatter TIMESTAMP_FORMAT =
             DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -41,19 +41,20 @@ public class ScreenshotOnFailureExtension implements AfterTestExecutionCallback 
         if (context.getExecutionException().isEmpty()) {
             return;
         }
-        Page page = WebDriverHolder.getPage();
-        if (page == null) {
+        Object instance = context.getRequiredTestInstance();
+        if (!(instance instanceof PageSource source) || source.getPage() == null) {
             log.warn("Скриншот для '{}' не сделан: страница уже закрыта", context.getDisplayName());
             return;
         }
-        Path dir = Paths.get(System.getProperty("reporting.screenshot-dir", DEFAULT_SCREENSHOT_DIR));
+        Page page = source.getPage();
         String fileName = sanitize(context.getDisplayName()) + "_"
                 + LocalDateTime.now().format(TIMESTAMP_FORMAT) + ".png";
         try {
             byte[] screenshot = page.screenshot();
-            Files.createDirectories(dir);
-            Files.write(dir.resolve(fileName), screenshot);
-            log.info("Скриншот при падении '{}' сохранён: {}", context.getDisplayName(), dir.resolve(fileName));
+            Files.createDirectories(SCREENSHOT_DIR);
+            Files.write(SCREENSHOT_DIR.resolve(fileName), screenshot);
+            log.info("Скриншот при падении '{}' сохранён: {}", context.getDisplayName(),
+                    SCREENSHOT_DIR.resolve(fileName));
             attachToAllure(screenshot);
         } catch (IOException | RuntimeException e) {
             log.warn("Не удалось сохранить скриншот для '{}': {}", context.getDisplayName(), e.getMessage());

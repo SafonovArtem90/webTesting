@@ -1,5 +1,6 @@
 package mywebtests.core.extensions;
 
+import io.qameta.allure.Allure;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import mywebtests.core.PlaywrightSessionReset;
@@ -10,7 +11,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Расширение JUnit 5: повторяет упавший тест заданное число раз.
- * Перед каждым повтором сессия Playwright пересоздаётся, чтобы тест стартовал с чистой страницы.
+ * Перед каждым повтором контекст Playwright пересоздаётся, чтобы тест стартовал с чистой
+ * страницы; в отчёт Allure добавляется шаг «Повторная попытка N из M…».
+ * Реализовано через TestExecutionExceptionHandler с рефлексивным повторным вызовом метода,
+ * а не InvocationInterceptor: повторный {@code proceed()} конфликтует с цепочкой
+ * TimeoutExtension/AllureJupiter (JUnitException «called invocation multiple times»).
+ * Побочный эффект подхода: таймауты JUnit и перехватчики на повторной попытке не действуют,
+ * но таймауты Playwright (page.setDefaultTimeout) действуют — для UI-тестов это главное.
  * Количество повторов задаётся системным свойством testrun.retry-count
  * (мостится из переменной окружения TESTRUN_RETRY_COUNT в build.gradle, по умолчанию 1).
  */
@@ -35,10 +42,13 @@ public class RetryOnFailureExtension implements TestExecutionExceptionHandler {
         for (int attempt = 1; attempt <= retries; attempt++) {
             log.warn("Тест {} упал (попытка {} из {}): {}",
                     context.getDisplayName(), attempt, retries + 1, lastFailure.getMessage());
-            resetPlaywrightSession(context);
+            Allure.step(String.format("Повторная попытка %d из %d после ошибки: %s",
+                    attempt + 1, retries + 1, lastFailure.getMessage()));
+            resetPlaywrightContext(context);
             try {
                 invokeTestMethod(context);
-                log.info("Тест {} прошёл при повторной попытке {}", context.getDisplayName(), attempt + 1);
+                log.info("Тест {} прошёл при повторной попытке {}",
+                        context.getDisplayName(), attempt + 1);
                 return;
             } catch (Throwable t) {
                 lastFailure = t;
@@ -66,11 +76,11 @@ public class RetryOnFailureExtension implements TestExecutionExceptionHandler {
     }
 
     /**
-     * Пересоздаёт сессию Playwright, если тест поддерживает сброс сессии.
+     * Пересоздаёт контекст Playwright, если тест поддерживает пересоздание сессии.
      *
      * @param context контекст теста
      */
-    private void resetPlaywrightSession(ExtensionContext context) {
+    private void resetPlaywrightContext(ExtensionContext context) {
         Object instance = context.getRequiredTestInstance();
         if (instance instanceof PlaywrightSessionReset resettable) {
             resettable.resetSession();
@@ -78,7 +88,7 @@ public class RetryOnFailureExtension implements TestExecutionExceptionHandler {
     }
 
     /**
-     * Вызывает метод теста повторно.
+     * Вызывает метод теста повторно рефлексией.
      *
      * @param context контекст теста
      * @throws Throwable исключение, выброшенное методом теста

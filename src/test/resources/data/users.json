@@ -1,32 +1,26 @@
 [
   {
     "username": "standard_user",
-    "password": "secret_sauce",
-    "description": "Standard user with full access"
+    "password": "secret_sauce"
   },
   {
     "username": "locked_out_user",
-    "password": "secret_sauce",
-    "description": "Locked out user, login is blocked"
+    "password": "secret_sauce"
   },
   {
     "username": "problem_user",
-    "password": "secret_sauce",
-    "description": "User with broken product images"
+    "password": "secret_sauce"
   },
   {
     "username": "performance_glitch_user",
-    "password": "secret_sauce",
-    "description": "User with slow page loads"
+    "password": "secret_sauce"
   },
   {
     "username": "error_user",
-    "password": "secret_sauce",
-    "description": "User with errors on checkout completion"
+    "password": "secret_sauce"
   },
   {
     "username": "visual_user",
-    "password": "secret_sauce",
-    "description": "User with visual glitches on product images"
+    "password": "secret_sauce"
   }
 ]

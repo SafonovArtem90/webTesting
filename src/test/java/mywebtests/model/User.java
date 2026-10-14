@@ -1,6 +1,5 @@
 package mywebtests.model;
 
-import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

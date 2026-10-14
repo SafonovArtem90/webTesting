@@ -16,8 +16,18 @@ public class PlaywrightProperties {
     /** Базовый URL тестируемого приложения. */
     private String baseUrl = "https://www.saucedemo.com";
 
-    /** Браузер для запуска. */
-    private SupportedBrowser browser = SupportedBrowser.CHROMIUM;
+    /** Оверрайд браузера: имя {@link SupportedBrowser} (CHROMIUM/FIREFOX/WEB_KIT) или пусто — автовыбор. */
+    private String browser;
+
+    /**
+     * Устанавливает оверрайд браузера. Сеттер обязателен: без него Spring Boot
+     * не может забиндить переопределение из переменной окружения PLAYWRIGHT_BROWSER.
+     *
+     * @param browser имя браузера или {@code null}/пусто — автовыбор
+     */
+    public void setBrowser(String browser) {
+        this.browser = browser;
+    }
 
     /** Запуск браузера в фоновом режиме. */
     private boolean headless = true;

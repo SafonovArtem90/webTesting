@@ -1,8 +1,10 @@
 package mywebtests.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.TimeoutError;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import io.qameta.allure.Severity;
@@ -29,6 +31,9 @@ class UserBehaviorTest extends BaseTest {
 
     /** Расширенный таймаут для пользователя с производительностными глитчами. */
     private static final Duration GLITCH_TIMEOUT = Duration.ofSeconds(30);
+
+    /** Ограниченное ожидание навигации, которая для error_user не должна наступить. */
+    private static final Duration COMPLETION_WAIT = Duration.ofSeconds(5);
 
     /**
      * Эталонные цены стандартного пользователя: у visual_user они искажены.
@@ -108,13 +113,15 @@ class UserBehaviorTest extends BaseTest {
     }
 
     /**
-     * Error-user: после Finish внутренний API отвечает 401 — оформление
-     * не завершается, пользователь остаётся на странице обзора заказа.
+     * Error-user: Finish не завершает оформление заказа — переход на страницу
+     * завершения не происходит, пользователь остаётся на странице обзора заказа.
+     * Проверка браузеро-агностичная: сообщение «401» в консоли — это телеметрия
+     * Backtrace, которую видит только Chrome; в Firefox/WebKit таких сообщений нет.
      */
-    @DisplayName("Error-user: оформление заказа падает с ошибкой API 401")
+    @DisplayName("Error-user: оформление заказа не завершается, пользователь остаётся на обзоре")
     @Severity(SeverityLevel.CRITICAL)
     @Test
-    void errorUserCheckoutFailsWithApiError() {
+    void errorUserCheckoutDoesNotComplete() {
         InventoryPage inventory = loginAs(User.ERROR);
         inventory.waitUntilLoaded();
         inventory.addFirstItemToCart();
@@ -129,11 +136,14 @@ class UserBehaviorTest extends BaseTest {
                         .build());
         overview.waitUntilLoaded();
 
-        page.waitForConsoleMessage(
-                new Page.WaitForConsoleMessageOptions()
-                        .setPredicate(message -> message.text().contains("401"))
-                        .setTimeout(GLITCH_TIMEOUT.toMillis()),
-                overview::clickFinish);
+        overview.clickFinish();
+
+        // Негативная проверка вместо sleep: явно ждём возможную навигацию на страницу
+        // завершения с ограниченным таймаутом и ожидаем, что она не наступит
+        assertThatThrownBy(() -> page.waitForURL(
+                        Pattern.compile(".*/checkout-complete\\.html"),
+                        new Page.WaitForURLOptions().setTimeout(COMPLETION_WAIT.toMillis())))
+                .isInstanceOf(TimeoutError.class);
 
         PlaywrightAssertions.assertThat(page)
                 .hasURL(Pattern.compile(".*/checkout-step-two\\.html"));

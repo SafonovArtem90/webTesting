@@ -21,6 +21,8 @@ dependencies {
     // Spring Boot: тестовый контекст, инъекции, Jackson (версии управляются BOM)
     testImplementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.16"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Launcher JUnit для TestExecutionListener (TestRunInfoListener); версия от BOM
+    testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("com.fasterxml.jackson.core:jackson-databind")
 
     // Браузерная автоматизация
@@ -37,10 +39,16 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    // Пробрасываем -D свойства Gradle и мостим переменные окружения в тестовую JVM
-    systemProperties(System.getProperties().entries.associate { it.key.toString() to it.value })
-    systemProperty("testrun.retry-count", System.getenv("TESTRUN_RETRY_COUNT") ?: "1")
-    systemProperty("reporting.screenshot-dir", System.getenv("SCREENSHOT_DIR") ?: "build/screenshots")
+    // Мостим только нужные свойства. Полный проброс System.getProperties() утаскивал бы
+    // в тестовую JVM секреты демона (systemProp.* из gradle.properties) и мусор IDEA.
+    // env переопределяет -D; -D переопределяет значение по умолчанию
+    val retryCount = System.getenv("TESTRUN_RETRY_COUNT")
+            ?: System.getProperty("testrun.retry-count")
+            ?: "1"
+    systemProperty("testrun.retry-count", retryCount)
+    System.getProperty("allure.keepServiceLabels")?.let {
+        systemProperty("allure.keepServiceLabels", it)
+    }
 
     // Логи фреймворка (logback) видны в консоли при локальном запуске
     testLogging {
@@ -92,5 +100,5 @@ tasks.register<JavaExec>("playwrightInstall") {
     description = "Installs Playwright browsers matching the test framework version"
     classpath = sourceSets["test"].runtimeClasspath
     mainClass.set("com.microsoft.playwright.CLI")
-    args("install", "--with-deps", "chromium")
+    args("install", "--with-deps", "chromium", "firefox", "webkit")
 }
