@@ -1,1 +1,1 @@
-{"id":"d38c32c4def84bea313771e9fc48b73f","fullName":"mywebtests.tests.UserBehaviorTest.problemUserSeesPlaceholderImageForEveryProduct","name":"Problem-user: каждое изображение товара — заглушка 404","status":"passed","testResultsByEnv":{"default":"48886d15e9e4e1cfc3481a3ef4ec68d9"}}
+{"id":"d38c32c4def84bea313771e9fc48b73f","fullName":"mywebtests.tests.UserBehaviorTest.problemUserSeesPlaceholderImageForEveryProduct","name":"Problem-user: каждое изображение товара — заглушка 404","status":"passed","testResultsByEnv":{"default":"63963dee67516d79be8cfe890eb40ca8"}}
