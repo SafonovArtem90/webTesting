@@ -12,7 +12,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Убирает из отчёта служебные метки, которые адаптер Allure добавляет
- * в каждый тест автоматически: внутренний ID JUnit, хост, поток, фреймворк и язык.
+ * в каждый тест автоматически: внутренний ID JUnit, фреймворк и язык.
+ *
+ * <p>Метки {@code host} и {@code thread} намеренно остаются в отчёте:
+ * из них Allure 3 строит дорожки вкладки Timeline, без них она пустая.
  *
  * <p>Перед удалением значения меток пишутся в лог запуска тестов, чтобы их
  * можно было посмотреть без отчёта. По умолчанию метки вырезаются из
@@ -27,11 +30,14 @@ public class ServiceLabelsFilter implements TestLifecycleListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceLabelsFilter.class);
 
-    /** Служебные метки, не несущие смысла для теста и отчёта. */
+    /**
+     * Служебные метки, не несущие смысла для теста и отчёта.
+     *
+     * <p>{@code host} и {@code thread} не входят: из них Allure 3 собирает
+     * вкладку Timeline.
+     */
     private static final Set<String> SERVICE_LABELS = Set.of(
             "junit.platform.uniqueid",
-            "host",
-            "thread",
             "framework",
             "language");
 
