@@ -116,20 +116,6 @@ public class InventoryPage extends BasePage {
     }
 
     /**
-     * Возвращает ширину изображений товаров в пикселях:
-     * 0 означает, что изображение не загрузилось.
-     *
-     * @return список ширин изображений в naturalWidth
-     */
-    public List<Integer> getProductImageNaturalWidths() {
-        Object widths = getProductImages()
-                .evaluateAll("images => images.map(image => image.naturalWidth)");
-        @SuppressWarnings("unchecked")
-        List<Integer> result = (List<Integer>) widths;
-        return result;
-    }
-
-    /**
      * Открывает корзину.
      *
      * @return страница корзины

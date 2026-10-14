@@ -25,7 +25,8 @@ import mywebtests.data.UserDataProvider;
  * и подключает расширения: скриншот при падении и повтор при неудаче.
  */
 @SpringBootTest(classes = SaucedemoTestApplication.class)
-@ExtendWith({ScreenshotOnFailureExtension.class, RetryOnFailureExtension.class})
+@ExtendWith({ScreenshotOnFailureExtension.class,
+             RetryOnFailureExtension.class})
 public abstract class BaseTest implements PlaywrightSessionReset {
 
     private static final Logger log = LoggerFactory.getLogger(BaseTest.class);

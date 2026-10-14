@@ -11,7 +11,6 @@ public final class WebDriverHolder {
     private static final ThreadLocal<Page> CURRENT_PAGE = new ThreadLocal<>();
 
     private WebDriverHolder() {
-        // Утилитарный класс, экземпляр не создаётся
     }
 
     /**

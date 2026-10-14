@@ -32,18 +32,4 @@ public enum User {
 
     /** Имя пользователя на стороне приложения. */
     private final String username;
-
-    /**
-     * Находит вариант пользователя по его имени.
-     *
-     * @param username имя пользователя в приложении
-     * @return вариант пользователя
-     * @throws IllegalArgumentException если пользователь неизвестен
-     */
-    public static User fromUsername(String username) {
-        return Arrays.stream(values())
-                .filter(user -> user.username.equals(username))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown user: " + username));
-    }
 }

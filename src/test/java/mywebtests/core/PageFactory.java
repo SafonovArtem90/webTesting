@@ -8,10 +8,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Фабрика создания page-объектов для Playwright.
- * <p>
- * Selenium-стиль (@FindBy + PageFactory.initElements) к Playwright не применим:
- * локаторы в Playwright ленивые и создаются методами, поэтому page-объекты
- * инициализируются через конструктор с инъекцией PageFactory.
  */
 public final class PageFactory {
 

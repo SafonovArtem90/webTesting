@@ -1,7 +1,6 @@
 plugins {
     id("java")
     id("checkstyle")
-    // Allure: сбор результатов из тестов (adapter) и генерация отчёта (report)
     id("io.qameta.allure") version "4.3.0"
 }
 

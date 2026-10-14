@@ -56,7 +56,6 @@ public class ScreenshotOnFailureExtension implements AfterTestExecutionCallback 
             log.info("Скриншот при падении '{}' сохранён: {}", context.getDisplayName(), dir.resolve(fileName));
             attachToAllure(screenshot);
         } catch (IOException | RuntimeException e) {
-            // Скриншот — вспомогательный артефакт, его ошибка не должна маскировать падение теста
             log.warn("Не удалось сохранить скриншот для '{}': {}", context.getDisplayName(), e.getMessage());
         }
     }
