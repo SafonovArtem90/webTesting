@@ -47,7 +47,7 @@
 ./gradlew test --tests "mywebtests.tests.LoginTest.loginWithStandardUser"
 ```
 
-Заведомо падающий демо-тест (проверка скриншота и ошибки в Allure; по умолчанию пропускается):
+Заведомо падающий демо-тест (проверка скриншота и ошибки в Allure; локально по умолчанию пропускается, в CI выполняется всегда):
 
 ```bash
 DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
@@ -61,7 +61,7 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 | `LoginTest` | 4 | Успешный логин и выход (`standard_user`), сообщение об ошибке и блокировка (`locked_out_user`) |
 | `UserBehaviorTest` | 8 | Сценарии `problem_user`, `performance_glitch_user`, `error_user`, `visual_user` по 2 теста |
 | `DynamicCatalogTest` | 2 | Лоадер спиннер-каталога и ленивая подгрузка в Dynamic Catalog |
-| `DemoFailureTest` | 1 | Демо-падение для проверки скриншота и ошибки в Allure (запускается только при `DEMO_FAIL=true`) |
+| `DemoFailureTest` | 1 | Демо-падение для проверки скриншота и ошибки в Allure (локально — при `DEMO_FAIL=true`, в CI — всегда; прогон не заваливает) |
 
 Особенности поведения saucedemo, заложенные в проверки (проверено экспериментально):
 
@@ -135,15 +135,15 @@ Checkstyle 12.0.0, конфиг — `config/checkstyle/checkstyle.xml`: Javadoc 
 
 ## CI (GitHub Actions)
 
-`.github/workflows/ui-tests.yml` — на push в `main`, pull request и вручную (вход `demo_fail`):
+`.github/workflows/ui-tests.yml` — на push в `main`, pull request и вручную:
 
 1. Восстановление истории Allure из ветки `gh-pages`
 2. JDK 17 (temurin) с кешем Gradle
 3. `./gradlew playwrightInstall` — браузеры той же версии, что и в тестах
-4. `./gradlew check` — тесты + чекстайл (при падении прогон продолжается, чтобы собрать отчёт)
+4. `./gradlew checkstyleTest` и `./gradlew test` — каждый шаг продолжает прогон при падении, чтобы собрать отчёт; тесты идут с `DEMO_FAIL=true` (демо-тест падает каждый раз)
 5. `./gradlew allureReport` — отчёт с историей трендов, публикация в `gh-pages`
 6. Артефакты: `allure-results` (всегда) и `screenshots` (при падении)
-7. Финальный шаг завершает прогон ошибкой, если тесты упали
+7. Финальный гейт: прогон красный только при реальных падениях тестов (кроме `DemoFailureTest`), ошибках компиляции/инфраструктуры или проблемах Checkstyle
 
 Отчёт разворачивается на GitHub Pages: **https://safonovartem90.github.io/webTesting/** — история тестов копится между прогонами.
 
