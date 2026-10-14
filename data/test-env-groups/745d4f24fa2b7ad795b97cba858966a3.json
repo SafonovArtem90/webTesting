@@ -1,1 +1,1 @@
-{"id":"745d4f24fa2b7ad795b97cba858966a3","fullName":"mywebtests.tests.DemoFailureTest.deliberatelyFailingTestShowsErrorAndScreenshotInAllure","name":"Демо-падение: ошибка и скриншот отображаются в отчёте","status":"failed","testResultsByEnv":{"default":"6fa735d551585d55229583cd2b7e0e92"}}
+{"id":"745d4f24fa2b7ad795b97cba858966a3","fullName":"mywebtests.tests.DemoFailureTest.deliberatelyFailingTestShowsErrorAndScreenshotInAllure","name":"Демо-падение: ошибка и скриншот отображаются в отчёте","status":"failed","testResultsByEnv":{"default":"35d6f8c7dc6c6e975998c5f22bb05d43"}}
