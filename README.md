@@ -125,7 +125,7 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 - Отчёт Allure: `./gradlew allureReport` → `build/reports/allure-report/allureReport/index.html`. Шаги тестов — из `@Step`, описания — из Javadoc.
 - Названия тестов и классов в отчёте — русские (`@DisplayName`), приоритет — `@Severity` (blocker / critical / normal / minor / trivial); `historyId` считается от идентификатора теста в JUnit, поэтому смена названий не сбрасывает тренды.
 - Служебные метки JUnit-платформы (`junit.platform.uniqueid`, `host`, `thread`, `framework`, `language`) в отчёт не попадают: фильтр `ServiceLabelsFilter` (`src/test/java/mywebtests/core/allure/`) пишет их в консоль при запуске. Отладочный режим с метками в отчёте: переменная `ALLURE_KEEP_SERVICE_LABELS=true` (или системное свойство `-Dallure.keepServiceLabels=true`).
-- Результаты (`build/allure-results`) и каталог отчёта очищаются автоматически перед запуском тестов и генерацией — старые прогоны не склеиваются со свежими.
+- Результаты (`build/allure-results`) и каталог отчёта очищаются автоматически перед запуском тестов и генерацией — старые прогоны не склеиваются со свежими. Каталог результатов и автоочистка заданы в `src/test/resources/allure.properties`, поэтому тесты, запущенные из IDE (IntelliJ IDEA), тоже пишут результаты в `build/allure-results` и попадают в отчёт.
 - История трендов: `build/allure-history/history.jsonl` (настраивается в `config/allure/allurerc.mjs`); дописывается при каждой генерации. В CI файл хранится в ветке `gh-pages` вместе с отчётом.
 - Отчёт Gradle: `build/reports/tests/test/index.html`. XML-результаты: `build/test-results/test/`.
 
