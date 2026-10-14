@@ -3,20 +3,26 @@ package mywebtests.tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import mywebtests.core.BaseTest;
 import mywebtests.model.User;
 import mywebtests.pages.InventoryPage;
 import mywebtests.pages.LoginPage;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
  * Тесты логина: стандартный пользователь и заблокированный пользователь.
  */
+@DisplayName("Авторизация: логин и блокировка")
 class LoginTest extends BaseTest {
 
     /**
      * Стандартный пользователь успешно логинится и видит каталог товаров.
      */
+    @DisplayName("Успешный логин стандартного пользователя и отображение каталога")
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     void standardUserSuccessfullyLogsInAndSeesInventory() {
         InventoryPage inventory = pages.create(LoginPage.class)
@@ -31,6 +37,8 @@ class LoginTest extends BaseTest {
     /**
      * Стандартный пользователь разлогинивается и возвращается на форму логина.
      */
+    @DisplayName("Выход стандартного пользователя и возврат на страницу логина")
+    @Severity(SeverityLevel.NORMAL)
     @Test
     void standardUserCanLogOutAndReturnToLoginPage() {
         LoginPage loginPage = pages.create(LoginPage.class)
@@ -45,6 +53,8 @@ class LoginTest extends BaseTest {
     /**
      * Заблокированный пользователь видит сообщение о блокировке аккаунта.
      */
+    @DisplayName("Заблокированный пользователь видит сообщение о блокировке")
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     void lockedOutUserSeesLockoutErrorMessage() {
         LoginPage loginPage = pages.create(LoginPage.class)
@@ -59,6 +69,8 @@ class LoginTest extends BaseTest {
      * Заблокированный пользователь не получает доступ к каталогу:
      * прямой переход на страницу каталога перенаправляет на форму логина.
      */
+    @DisplayName("Заблокированный пользователь не имеет доступа к каталогу")
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     void lockedOutUserCannotAccessInventory() {
         pages.create(LoginPage.class)

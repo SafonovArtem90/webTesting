@@ -6,6 +6,7 @@
 - **Page Object** с собственной фабрикой и внедрением зависимостей через **Spring Boot**
 - **Повтор при падении** и **скриншоты при падении** — отдельными расширениями JUnit 5
 - **Allure-отчёт** с шагами `@Step`, вложениями-скриншотами и **историей трендов** между прогонами
+- **Русские названия тестов** (`@DisplayName`) и **приоритеты** (`@Severity`) в отчёте; служебные метки платформы (uniqueid, host, thread…) уходят в лог запуска, а не в отчёт
 - **Логи** фреймворка в консоли при локальном запуске (Logback)
 - **Checkstyle** с обязательным Javadoc, **GitHub Actions** CI + публикация отчёта на GitHub Pages
 - Настройки — через переменные окружения и `application.properties`
@@ -122,6 +123,9 @@ DEMO_FAIL=true ./gradlew test --tests "mywebtests.tests.DemoFailureTest"
 - **Логи**: при локальном запуске в консоль Gradle выводятся логи фреймворка (сессия Playwright, создание page object, повторы, скриншоты). Конфиг — `src/test/resources/logback-test.xml` (пакет `mywebtests` — DEBUG, Spring/Playwright — WARN).
 - При падении теста в `build/screenshots/<имя-теста>_<время>.png` сохраняется скриншот страницы (каталог переопределяется `SCREENSHOT_DIR`) **и** он прикрепляется к тесту в Allure («Скриншот при падении»).
 - Отчёт Allure: `./gradlew allureReport` → `build/reports/allure-report/allureReport/index.html`. Шаги тестов — из `@Step`, описания — из Javadoc.
+- Названия тестов и классов в отчёте — русские (`@DisplayName`), приоритет — `@Severity` (blocker / critical / normal / minor / trivial); `historyId` считается от идентификатора теста в JUnit, поэтому смена названий не сбрасывает тренды.
+- Служебные метки JUnit-платформы (`junit.platform.uniqueid`, `host`, `thread`, `framework`, `language`) в отчёт не попадают: фильтр `ServiceLabelsFilter` (`src/test/java/mywebtests/core/allure/`) пишет их в консоль при запуске. Отладочный режим с метками в отчёте: переменная `ALLURE_KEEP_SERVICE_LABELS=true` (или системное свойство `-Dallure.keepServiceLabels=true`).
+- Результаты (`build/allure-results`) и каталог отчёта очищаются автоматически перед запуском тестов и генерацией — старые прогоны не склеиваются со свежими.
 - История трендов: `build/allure-history/history.jsonl` (настраивается в `config/allure/allurerc.mjs`); дописывается при каждой генерации. В CI файл хранится в ветке `gh-pages` вместе с отчётом.
 - Отчёт Gradle: `build/reports/tests/test/index.html`. XML-результаты: `build/test-results/test/`.
 

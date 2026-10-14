@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Step;
 import java.time.Duration;
 import java.util.List;
@@ -15,12 +17,14 @@ import mywebtests.model.User;
 import mywebtests.pages.CheckoutOverviewPage;
 import mywebtests.pages.InventoryPage;
 import mywebtests.pages.LoginPage;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
  * Поведенческие тесты для специальных пользователей demo-приложения:
  * problem_user, performance_glitch_user, error_user, visual_user.
  */
+@DisplayName("Поведенческие сценарии специальных пользователей")
 class UserBehaviorTest extends BaseTest {
 
     /** Расширенный таймаут для пользователя с производительностными глитчами. */
@@ -35,6 +39,8 @@ class UserBehaviorTest extends BaseTest {
     /**
      * Problem-user: логин успешен, каталог отображается с названиями товаров.
      */
+    @DisplayName("Problem-user: логин и отображение названий товаров")
+    @Severity(SeverityLevel.NORMAL)
     @Test
     void problemUserLogsInAndSeesProductNames() {
         InventoryPage inventory = loginAs(User.PROBLEM);
@@ -48,6 +54,8 @@ class UserBehaviorTest extends BaseTest {
     /**
      * Problem-user: каждое изображение товара заменено на общую заглушку 404.
      */
+    @DisplayName("Problem-user: каждое изображение товара — заглушка 404")
+    @Severity(SeverityLevel.MINOR)
     @Test
     void problemUserSeesPlaceholderImageForEveryProduct() {
         InventoryPage inventory = loginAs(User.PROBLEM);
@@ -63,6 +71,8 @@ class UserBehaviorTest extends BaseTest {
     /**
      * Performance-glitch-user: логин проходит медленно, но успешно.
      */
+    @DisplayName("Performance-glitch-user: медленный логин с расширенным таймаутом")
+    @Severity(SeverityLevel.NORMAL)
     @Test
     void performanceGlitchUserLogsInWithExtendedTimeout() {
         InventoryPage inventory = loginAs(User.PERFORMANCE_GLITCH);
@@ -74,6 +84,8 @@ class UserBehaviorTest extends BaseTest {
     /**
      * Performance-glitch-user: товары появляются в каталоге с задержкой.
      */
+    @DisplayName("Performance-glitch-user: товары появляются в каталоге с задержкой")
+    @Severity(SeverityLevel.NORMAL)
     @Test
     void performanceGlitchUserEventuallySeesAllProducts() {
         InventoryPage inventory = loginAs(User.PERFORMANCE_GLITCH);
@@ -85,6 +97,8 @@ class UserBehaviorTest extends BaseTest {
     /**
      * Error-user: логин успешен и каталог отображается.
      */
+    @DisplayName("Error-user: успешный логин и отображение каталога")
+    @Severity(SeverityLevel.NORMAL)
     @Test
     void errorUserSuccessfullyLogsIn() {
         InventoryPage inventory = loginAs(User.ERROR);
@@ -97,6 +111,8 @@ class UserBehaviorTest extends BaseTest {
      * Error-user: после Finish внутренний API отвечает 401 — оформление
      * не завершается, пользователь остаётся на странице обзора заказа.
      */
+    @DisplayName("Error-user: оформление заказа падает с ошибкой API 401")
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     void errorUserCheckoutFailsWithApiError() {
         InventoryPage inventory = loginAs(User.ERROR);
@@ -126,6 +142,8 @@ class UserBehaviorTest extends BaseTest {
     /**
      * Visual-user: логин успешен и каталог отображается.
      */
+    @DisplayName("Visual-user: успешный логин и отображение каталога")
+    @Severity(SeverityLevel.NORMAL)
     @Test
     void visualUserSuccessfullyLogsIn() {
         InventoryPage inventory = loginAs(User.VISUAL);
@@ -138,6 +156,8 @@ class UserBehaviorTest extends BaseTest {
      * Visual-user: цены товаров визуально искажены и отличаются от эталонных
      * (значения случайны при каждой загрузке страницы).
      */
+    @DisplayName("Visual-user: цены товаров искажены относительно эталонных")
+    @Severity(SeverityLevel.MINOR)
     @Test
     void visualUserSeesDistortedPrices() {
         InventoryPage inventory = loginAs(User.VISUAL);

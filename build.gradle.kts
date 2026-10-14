@@ -49,6 +49,13 @@ tasks.test {
         events("passed", "failed", "skipped")
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
+
+    // Результаты Allure не накапливаются между прогонами: каждый запуск
+    // начинает с пустого build/allure-results, иначе отчёт склеит старые
+    // и новые результаты по historyId и покажет устаревшие данные
+    doFirst {
+        delete(layout.buildDirectory.dir("allure-results"))
+    }
 }
 
 allure {
@@ -62,6 +69,15 @@ allure {
     report {
         // Allure 3: конфиг с историей трендов (build/allure-history/history.jsonl)
         configFile.set(layout.projectDirectory.file("config/allure/allurerc.mjs"))
+    }
+}
+
+// Каталог отчёта очищается перед генерацией: Allure 3 (плагин Awesome) при
+// повторном запуске в непустой каталог оставляет прошлый отчёт в корне,
+// а новый складывает в подкаталог awesome/ вместе со старыми результатами
+tasks.named("allureReport") {
+    doFirst {
+        delete(layout.buildDirectory.dir("reports/allure-report"))
     }
 }
 
