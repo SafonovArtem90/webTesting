@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Логирование фреймворка при локальном запуске тестов (вывод идёт в консоль Gradle). -->
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{30} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Логи проекта: подробные (шаги сессии, повторы, скриншоты) -->
+    <logger name="mywebtests" level="DEBUG"/>
+
+    <!-- Сторонние библиотеки: только предупреждения и ошибки -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="com.microsoft.playwright" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

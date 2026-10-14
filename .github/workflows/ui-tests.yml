@@ -1,0 +1,105 @@
+name: UI tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      demo_fail:
+        description: "Запустить демо-падающий тест (DEMO_FAIL=true)"
+        type: boolean
+        default: false
+
+# Публикация отчёта в GitHub Pages требует записи в ветку gh-pages
+permissions:
+  contents: write
+
+# Один прогон на ветку: незавершённые заменяются новыми
+concurrency:
+  group: ui-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    env:
+      # Настройки окружения: переопределяют значения application.properties
+      PLAYWRIGHT_BASE_URL: https://www.saucedemo.com
+      PLAYWRIGHT_BROWSER: CHROMIUM
+      PLAYWRIGHT_HEADLESS: true
+      PLAYWRIGHT_TIMEOUT: 10s
+      TESTRUN_RETRY_COUNT: 1
+      SCREENSHOT_DIR: build/screenshots
+      # Демо-падение: включается входом demo_fail при ручном запуске
+      DEMO_FAIL: ${{ inputs.demo_fail == true && 'true' || 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout предыдущего отчёта (история Allure)
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: .gh-pages-prev
+        continue-on-error: true
+
+      - name: Восстановить историю Allure
+        run: |
+          mkdir -p build/allure-history
+          if [ -f .gh-pages-prev/history.jsonl ]; then
+            cp .gh-pages-prev/history.jsonl build/allure-history/history.jsonl
+            echo "История восстановлена: $(wc -l < build/allure-history/history.jsonl) прогонов"
+          else
+            echo "Истории ещё нет — первый прогон"
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Install Playwright browsers
+        run: ./gradlew playwrightInstall --no-daemon
+
+      - name: Run tests and checks
+        id: tests
+        continue-on-error: true
+        run: ./gradlew check --no-daemon
+
+      - name: Build Allure report
+        if: always() && hashFiles('build/allure-results/*.json') != ''
+        run: |
+          ./gradlew allureReport --no-daemon
+          # История трендов публикуется вместе с отчётом — следующий прогон её прочитает
+          cp build/allure-history/history.jsonl build/reports/allure-report/allureReport/history.jsonl
+
+      - name: Publish Allure report to GitHub Pages
+        if: always() && hashFiles('build/reports/allure-report/allureReport/index.html') != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/reports/allure-report/allureReport
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: build/allure-results
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: build/screenshots
+          if-no-files-found: ignore
+
+      - name: Fail the run if tests failed
+        if: steps.tests.outcome == 'failure'
+        run: exit 1
